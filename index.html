@@ -2,82 +2,107 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>CRM PRO Mini App</title>
+<title>Fast Food Mini App</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
 body{
-  font-family: Arial;
-  background:#f4f6f9;
+  margin:0;
+  font-family: Arial, sans-serif;
+  background:#f8f9fb;
+}
+
+.header{
+  background:#ff3d00;
+  color:white;
+  padding:20px;
+  border-bottom-left-radius:25px;
+  border-bottom-right-radius:25px;
+}
+
+.container{
   padding:15px;
 }
 
 .card{
   background:white;
+  border-radius:20px;
   padding:15px;
-  border-radius:15px;
   margin-bottom:15px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.05);
+  box-shadow:0 5px 15px rgba(0,0,0,0.06);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
 
-h2{
-  margin-top:0;
+.card img{
+  width:70px;
+  height:70px;
+  border-radius:15px;
 }
 
-input, select{
+.info{
+  flex:1;
+  margin-left:10px;
+}
+
+.price{
+  font-weight:bold;
+  color:#ff3d00;
+}
+
+.qty{
+  display:flex;
+  align-items:center;
+}
+
+.qty button{
+  width:30px;
+  height:30px;
+  border:none;
+  border-radius:8px;
+  background:#ff3d00;
+  color:white;
+  font-size:18px;
+}
+
+.qty span{
+  margin:0 8px;
+}
+
+.cart{
+  position:fixed;
+  bottom:0;
   width:100%;
-  padding:12px;
-  margin-top:8px;
-  border-radius:10px;
-  border:1px solid #ddd;
+  background:white;
+  padding:15px;
+  box-shadow:0 -5px 15px rgba(0,0,0,0.08);
 }
 
-button{
+.cart button{
   width:100%;
   padding:15px;
-  margin-top:15px;
   border:none;
-  border-radius:12px;
-  font-size:16px;
-  background:#2AABEE;
+  border-radius:15px;
+  background:#ff3d00;
   color:white;
-}
-
-.total{
-  font-size:20px;
-  font-weight:bold;
-  margin-top:10px;
-  color:#2AABEE;
+  font-size:16px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="card">
-  <h2>👤 Foydalanuvchi</h2>
-  <p id="userInfo"></p>
-  <p><b>Balans:</b> <span id="balance">120000</span> so'm</p>
+<div class="header">
+  <h2>🔥 Fast Food</h2>
+  <p id="user"></p>
 </div>
 
-<div class="card">
-  <h2>🛒 Mahsulot buyurtma</h2>
+<div class="container" id="menu"></div>
 
-  <label>Mahsulot:</label>
-  <select id="product" onchange="calculate()">
-    <option value="25000">Sochiq - 25 000</option>
-    <option value="40000">Futbolka - 40 000</option>
-    <option value="70000">Kastyum - 70 000</option>
-  </select>
-
-  <label>Miqdor:</label>
-  <input type="number" id="qty" value="1" onchange="calculate()">
-
-  <div class="total">
-    Jami: <span id="total">25000</span> so'm
-  </div>
-
-  <button onclick="sendOrder()">Buyurtma yuborish</button>
+<div class="cart">
+  <h3>Jami: <span id="total">0</span> so'm</h3>
+  <button onclick="sendOrder()">Buyurtma berish</button>
 </div>
 
 <script>
@@ -85,33 +110,78 @@ let tg = window.Telegram.WebApp;
 tg.expand();
 
 let user = tg.initDataUnsafe.user;
+document.getElementById("user").innerText =
+user.first_name;
 
-document.getElementById("userInfo").innerHTML =
-"ID: " + user.id + "<br>" +
-"Ism: " + user.first_name;
+let products = [
+  {name:"Burger", price:30000, img:"https://i.imgur.com/6X4QK6K.png"},
+  {name:"Lavash", price:25000, img:"https://i.imgur.com/5KX9Q9L.png"},
+  {name:"Hot-Dog", price:20000, img:"https://i.imgur.com/Z6X5X8R.png"},
+  {name:"Cola", price:8000, img:"https://i.imgur.com/3ZQ3Z3S.png"}
+];
 
-function calculate(){
-  let price = document.getElementById("product").value;
-  let qty = document.getElementById("qty").value;
-  let total = price * qty;
+let cart = {};
+
+function renderMenu(){
+  let menu = document.getElementById("menu");
+  menu.innerHTML = "";
+
+  products.forEach((p,i)=>{
+    cart[i] = 0;
+
+    menu.innerHTML += `
+    <div class="card">
+      <img src="${p.img}">
+      <div class="info">
+        <div>${p.name}</div>
+        <div class="price">${p.price} so'm</div>
+      </div>
+      <div class="qty">
+        <button onclick="changeQty(${i},-1)">-</button>
+        <span id="qty${i}">0</span>
+        <button onclick="changeQty(${i},1)">+</button>
+      </div>
+    </div>
+    `;
+  });
+}
+
+function changeQty(i,change){
+  cart[i] += change;
+  if(cart[i] < 0) cart[i] = 0;
+  document.getElementById("qty"+i).innerText = cart[i];
+  calculateTotal();
+}
+
+function calculateTotal(){
+  let total = 0;
+  products.forEach((p,i)=>{
+    total += p.price * cart[i];
+  });
   document.getElementById("total").innerText = total;
 }
 
 function sendOrder(){
-  let product = document.getElementById("product").selectedOptions[0].text;
-  let qty = document.getElementById("qty").value;
-  let total = document.getElementById("total").innerText;
+  let order = [];
+  products.forEach((p,i)=>{
+    if(cart[i] > 0){
+      order.push({
+        name:p.name,
+        qty:cart[i],
+        price:p.price
+      });
+    }
+  });
 
-  let data = {
-    product: product,
-    quantity: qty,
-    total: total
-  };
+  if(order.length == 0){
+    alert("Mahsulot tanlang!");
+    return;
+  }
 
-  tg.sendData(JSON.stringify(data));
+  tg.sendData(JSON.stringify(order));
 }
 
-calculate();
+renderMenu();
 </script>
 
 </body>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Mini App</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body style="font-family:sans-serif; padding:20px;">
+
+<h2>Salom Mini App</h2>
+<p id="user"></p>
+
+<button onclick="sendData()">Yuborish</button>
+
+<script>
+let tg = window.Telegram.WebApp;
+tg.expand();
+
+document.getElementById("user").innerText =
+"User ID: " + tg.initDataUnsafe.user.id;
+
+function sendData(){
+  tg.sendData("Salom bot");
+}
+</script>
+
+</body>
+</html>

@@ -1,27 +1,117 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Mini App</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<meta charset="UTF-8">
+<title>CRM PRO Mini App</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<style>
+body{
+  font-family: Arial;
+  background:#f4f6f9;
+  padding:15px;
+}
+
+.card{
+  background:white;
+  padding:15px;
+  border-radius:15px;
+  margin-bottom:15px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.05);
+}
+
+h2{
+  margin-top:0;
+}
+
+input, select{
+  width:100%;
+  padding:12px;
+  margin-top:8px;
+  border-radius:10px;
+  border:1px solid #ddd;
+}
+
+button{
+  width:100%;
+  padding:15px;
+  margin-top:15px;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  background:#2AABEE;
+  color:white;
+}
+
+.total{
+  font-size:20px;
+  font-weight:bold;
+  margin-top:10px;
+  color:#2AABEE;
+}
+</style>
 </head>
-<body style="font-family:sans-serif; padding:20px;">
 
-<h2>Salom Mini App</h2>
-<p id="user"></p>
+<body>
 
-<button onclick="sendData()">Yuborish</button>
+<div class="card">
+  <h2>👤 Foydalanuvchi</h2>
+  <p id="userInfo"></p>
+  <p><b>Balans:</b> <span id="balance">120000</span> so'm</p>
+</div>
+
+<div class="card">
+  <h2>🛒 Mahsulot buyurtma</h2>
+
+  <label>Mahsulot:</label>
+  <select id="product" onchange="calculate()">
+    <option value="25000">Sochiq - 25 000</option>
+    <option value="40000">Futbolka - 40 000</option>
+    <option value="70000">Kastyum - 70 000</option>
+  </select>
+
+  <label>Miqdor:</label>
+  <input type="number" id="qty" value="1" onchange="calculate()">
+
+  <div class="total">
+    Jami: <span id="total">25000</span> so'm
+  </div>
+
+  <button onclick="sendOrder()">Buyurtma yuborish</button>
+</div>
 
 <script>
 let tg = window.Telegram.WebApp;
 tg.expand();
 
-document.getElementById("user").innerText =
-"User ID: " + tg.initDataUnsafe.user.id;
+let user = tg.initDataUnsafe.user;
 
-function sendData(){
-  tg.sendData("Salom bot");
+document.getElementById("userInfo").innerHTML =
+"ID: " + user.id + "<br>" +
+"Ism: " + user.first_name;
+
+function calculate(){
+  let price = document.getElementById("product").value;
+  let qty = document.getElementById("qty").value;
+  let total = price * qty;
+  document.getElementById("total").innerText = total;
 }
+
+function sendOrder(){
+  let product = document.getElementById("product").selectedOptions[0].text;
+  let qty = document.getElementById("qty").value;
+  let total = document.getElementById("total").innerText;
+
+  let data = {
+    product: product,
+    quantity: qty,
+    total: total
+  };
+
+  tg.sendData(JSON.stringify(data));
+}
+
+calculate();
 </script>
 
 </body>

@@ -2,107 +2,50 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Fast Food Mini App</title>
+<title>Fast Food</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
-body{
-  margin:0;
-  font-family: Arial, sans-serif;
-  background:#f8f9fb;
-}
-
-.header{
-  background:#ff3d00;
-  color:white;
-  padding:20px;
-  border-bottom-left-radius:25px;
-  border-bottom-right-radius:25px;
-}
-
-.container{
-  padding:15px;
-}
-
-.card{
-  background:white;
-  border-radius:20px;
-  padding:15px;
-  margin-bottom:15px;
-  box-shadow:0 5px 15px rgba(0,0,0,0.06);
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.card img{
-  width:70px;
-  height:70px;
-  border-radius:15px;
-}
-
-.info{
-  flex:1;
-  margin-left:10px;
-}
-
-.price{
-  font-weight:bold;
-  color:#ff3d00;
-}
-
-.qty{
-  display:flex;
-  align-items:center;
-}
-
-.qty button{
-  width:30px;
-  height:30px;
-  border:none;
-  border-radius:8px;
-  background:#ff3d00;
-  color:white;
-  font-size:18px;
-}
-
-.qty span{
-  margin:0 8px;
-}
-
-.cart{
-  position:fixed;
-  bottom:0;
-  width:100%;
-  background:white;
-  padding:15px;
-  box-shadow:0 -5px 15px rgba(0,0,0,0.08);
-}
-
-.cart button{
-  width:100%;
-  padding:15px;
-  border:none;
-  border-radius:15px;
-  background:#ff3d00;
-  color:white;
-  font-size:16px;
-}
+body{margin:0;font-family:Arial;background:#f5f5f5}
+.header{background:#ff3d00;color:white;padding:20px;border-bottom-left-radius:20px;border-bottom-right-radius:20px}
+.container{padding:15px}
+.card{background:white;border-radius:15px;padding:15px;margin-bottom:15px;box-shadow:0 5px 15px rgba(0,0,0,0.05)}
+button{width:100%;padding:12px;border:none;border-radius:10px;background:#ff3d00;color:white;margin-top:10px}
+input{width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1px solid #ddd}
 </style>
 </head>
 
 <body>
 
 <div class="header">
-  <h2>🔥 Fast Food</h2>
-  <p id="user"></p>
+<h2>🍔 Fast Food</h2>
+<p id="user"></p>
 </div>
 
-<div class="container" id="menu"></div>
+<div class="container">
 
-<div class="cart">
-  <h3>Jami: <span id="total">0</span> so'm</h3>
-  <button onclick="sendOrder()">Buyurtma berish</button>
+<div class="card">
+<h3>Burger - 30000 so'm</h3>
+<input type="number" id="burger" placeholder="Miqdor">
+</div>
+
+<div class="card">
+<h3>Lavash - 25000 so'm</h3>
+<input type="number" id="lavash" placeholder="Miqdor">
+</div>
+
+<div class="card">
+<h3>Cola - 8000 so'm</h3>
+<input type="number" id="cola" placeholder="Miqdor">
+</div>
+
+<div class="card">
+<h3>Ma'lumot</h3>
+<input type="text" id="name" placeholder="Ismingiz">
+<input type="tel" id="phone" placeholder="Telefon raqam">
+<button onclick="sendOrder()">Buyurtma berish</button>
+</div>
+
 </div>
 
 <script>
@@ -110,78 +53,39 @@ let tg = window.Telegram.WebApp;
 tg.expand();
 
 let user = tg.initDataUnsafe.user;
-document.getElementById("user").innerText =
-user.first_name;
-
-let products = [
-  {name:"Burger", price:30000, img:"https://i.imgur.com/6X4QK6K.png"},
-  {name:"Lavash", price:25000, img:"https://i.imgur.com/5KX9Q9L.png"},
-  {name:"Hot-Dog", price:20000, img:"https://i.imgur.com/Z6X5X8R.png"},
-  {name:"Cola", price:8000, img:"https://i.imgur.com/3ZQ3Z3S.png"}
-];
-
-let cart = {};
-
-function renderMenu(){
-  let menu = document.getElementById("menu");
-  menu.innerHTML = "";
-
-  products.forEach((p,i)=>{
-    cart[i] = 0;
-
-    menu.innerHTML += `
-    <div class="card">
-      <img src="${p.img}">
-      <div class="info">
-        <div>${p.name}</div>
-        <div class="price">${p.price} so'm</div>
-      </div>
-      <div class="qty">
-        <button onclick="changeQty(${i},-1)">-</button>
-        <span id="qty${i}">0</span>
-        <button onclick="changeQty(${i},1)">+</button>
-      </div>
-    </div>
-    `;
-  });
-}
-
-function changeQty(i,change){
-  cart[i] += change;
-  if(cart[i] < 0) cart[i] = 0;
-  document.getElementById("qty"+i).innerText = cart[i];
-  calculateTotal();
-}
-
-function calculateTotal(){
-  let total = 0;
-  products.forEach((p,i)=>{
-    total += p.price * cart[i];
-  });
-  document.getElementById("total").innerText = total;
-}
+document.getElementById("user").innerText = user.first_name;
 
 function sendOrder(){
-  let order = [];
-  products.forEach((p,i)=>{
-    if(cart[i] > 0){
-      order.push({
-        name:p.name,
-        qty:cart[i],
-        price:p.price
-      });
-    }
-  });
 
-  if(order.length == 0){
-    alert("Mahsulot tanlang!");
-    return;
-  }
+let burger = document.getElementById("burger").value || 0;
+let lavash = document.getElementById("lavash").value || 0;
+let cola = document.getElementById("cola").value || 0;
+let name = document.getElementById("name").value;
+let phone = document.getElementById("phone").value;
 
-  tg.sendData(JSON.stringify(order));
+if(!name || !phone){
+alert("Ism va telefon kiriting");
+return;
 }
 
-renderMenu();
+let total = burger*30000 + lavash*25000 + cola*8000;
+
+if(total == 0){
+alert("Mahsulot tanlang");
+return;
+}
+
+let data = {
+name:name,
+phone:phone,
+burger:burger,
+lavash:lavash,
+cola:cola,
+total:total
+};
+
+tg.sendData(JSON.stringify(data));
+}
 </script>
 
 </body>

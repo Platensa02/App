@@ -1,11 +1,13 @@
 import asyncio
 import json
+import os
 from aiogram import Bot, Dispatcher, F
 from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.enums import ParseMode
 
-BOT_TOKEN = "8565639582:AAELDRSjNaqTiLlu0O6_Ksd9D9zFSnzGwOg"
-ADMIN_ID = 6780565815 # o'zingni telegram ID
+# 🔐 Environment dan olish
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+ADMIN_ID = int(os.getenv("ADMIN_ID"))
 
 bot = Bot(token=BOT_TOKEN, parse_mode=ParseMode.HTML)
 dp = Dispatcher()
@@ -46,15 +48,21 @@ async def handle_callback(callback: CallbackQuery):
 
     if action == "confirm":
         await bot.send_message(user_id, "🟢 Buyurtmangiz tasdiqlandi!")
-        await callback.message.edit_text(callback.message.text.replace("🟡 Kutilmoqda", "🟢 Tasdiqlandi"))
+        await callback.message.edit_text(
+            callback.message.text.replace("🟡 Kutilmoqda", "🟢 Tasdiqlandi")
+        )
 
     elif action == "cancel":
         await bot.send_message(user_id, "🔴 Buyurtmangiz bekor qilindi.")
-        await callback.message.edit_text(callback.message.text.replace("🟡 Kutilmoqda", "🔴 Bekor qilindi"))
+        await callback.message.edit_text(
+            callback.message.text.replace("🟡 Kutilmoqda", "🔴 Bekor qilindi")
+        )
 
 
 async def main():
+    print("🚀 BOT ISHGA TUSHDI")
     await dp.start_polling(bot)
+
 
 if __name__ == "__main__":
     asyncio.run(main())
